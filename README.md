@@ -9,8 +9,9 @@ This research project builds ML pipelines to **predict next-day California manuf
 2. **Ranked Sets**: Multiple candidate 5-part combinations for location assignments
 
 ### Project Status
-- **Phase**: Team Setup Complete, Ready for EDA and Draft Review
-- **Last Session**: 2025-12-27 (C5 Agent Team Created)
+- **Phase**: Gap Analysis Complete, PRD/Architecture Updates Pending
+- **Last Session**: 2025-12-28 (Gap Analysis, Data Contract Created)
+- **Next Steps**: Update PRD.md and Architecture.md, then parse into Epics
 
 ---
 
@@ -35,7 +36,9 @@ This project contains manufacturing parts demand data from 6 US state locations,
 ### Aggregated File
 | File | Description | Rows |
 |------|-------------|------|
-| CA5_agregated_matrix.csv | Combined demand from CA, MI, MO, NY, OH, MD | 6,318 |
+| CA5_aggregated_matrix.csv | Combined demand from CA, MI, MO, NY, OH, MD | 6,318 |
+
+**Note:** File renamed from `CA5_agregated_matrix.csv` on 2025-12-28 to fix typo.
 
 ## Column Definitions
 
@@ -57,8 +60,20 @@ This project contains manufacturing parts demand data from 6 US state locations,
 
 ## Notes
 - ME5_matrix.csv excluded from aggregation due to shorter date range (2,542 vs ~6,318 records)
-- Minor date gaps exist on holidays (Christmas, etc.) in some files
+- Minor date gaps exist on holidays (Christmas, etc.) in some supporting state files
+- California (CA) operates 365 days/year with **no holiday gaps**
 - All files aligned by date for accurate aggregation
+
+## Critical Data Constraints
+
+### Location Ordering (Discovered 2025-12-28)
+In all matrix files, location values are **always strictly ascending**:
+```
+L_1 < L_2 < L_3 < L_4 < L_5
+```
+- No duplicate parts on same day for a given state
+- This constraint enables cascade filtering for set generation
+- See `docs/data_contract.md` for full invariant specifications
 
 ---
 
@@ -77,10 +92,12 @@ This project uses the BMAD Method with a specialized team of 7 agents for foreca
 | ⚙️ | Dev | ML Implementation Engineer | `/bmad:c5:agents:c5-ml-engineer` |
 
 ### Key Documentation
+- **Data Contract**: `docs/data_contract.md` - **Single source of truth** for data definitions, schemas, invariants
 - **PRD (Draft)**: `docs/c5_team_blueprint_artifacts_v2/_bmad-output/planning-artifacts/c5_team_blueprint/PRD.md`
 - **Architecture (Draft)**: `docs/c5_team_blueprint_artifacts_v2/_bmad-output/planning-artifacts/c5_team_blueprint/Architecture.md`
 - **TODO**: `docs/c5_team_blueprint_artifacts_v2/_bmad-output/planning-artifacts/c5_team_blueprint/TODO.md`
 - **C5 Module**: `_bmad/c5/`
+- **Session Notes**: `Session_summary_2025-12-28.md`, `Start_Here_Tomorrow_2025-12-29.md`
 
 ---
 
@@ -89,9 +106,11 @@ This project uses the BMAD Method with a specialized team of 7 agents for foreca
 ```
 c5_multi_location/
 ├── data/
-│   └── raw/                    # Source CSV files
+│   └── raw/                    # Source CSV files (7 state matrices + aggregated)
 ├── docs/
-│   └── c5_team_blueprint_artifacts_v2/  # ChatGPT handoff documents
+│   ├── data_contract.md        # Single source of truth for data specs
+│   ├── pc_specs.md             # Hardware specifications
+│   └── c5_team_blueprint_artifacts_v2/  # ChatGPT genesis documents
 ├── scripts/                    # Data processing scripts
 ├── _bmad/
 │   ├── c5/                     # C5 Agent Team Module
@@ -101,5 +120,7 @@ c5_multi_location/
 │   ├── bmm/                    # BMAD Method Module
 │   ├── bmb/                    # BMAD Builder Module
 │   └── core/                   # BMAD Core
+├── Session_summary_2025-12-28.md   # Session notes
+├── Start_Here_Tomorrow_2025-12-29.md  # Next session guide
 └── README.md
 ```
