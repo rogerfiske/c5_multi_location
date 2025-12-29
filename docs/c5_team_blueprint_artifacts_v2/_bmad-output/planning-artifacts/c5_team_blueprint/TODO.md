@@ -76,6 +76,11 @@
 | Backtest on 365-day holdout | DONE | `scripts/baseline_evaluation.py` |
 | Calculate Good+ rate | DONE | See results below |
 | Calculate Recall@K | DONE | See results below |
+| Inverse frequency baseline | DONE | `scripts/inverse_frequency_baseline.py` - No improvement |
+| Recency exclusion baseline | DONE | `scripts/recency_exclusion_baseline.py` - Pool ~0 (all parts in 30d) |
+| Transition analysis | DONE | `scripts/transition_analysis.py` - Found adjacency signals |
+| Adjacency-weighted baseline | DONE | `scripts/adjacency_weighted_baseline.py` - Recall improved |
+| Stochastic sampling baseline | DONE | `scripts/stochastic_sampling_baseline.py` - Oracle 1.1% |
 
 ### Baseline Results (2025-12-29)
 
@@ -94,14 +99,39 @@ The high Good+ rate (89%) comes from **4-5 wrong predictions** (inverted signal)
 
 **Implication:** Frequency-based greedy set generation produces ANTI-predictions. The most frequent parts are NOT tomorrow's parts.
 
-### Acceptance Criteria (from PRD)
+### Transition Analysis (2025-12-29)
 
-| Metric | Baseline | Target | Stretch |
-|--------|----------|--------|---------|
-| Good+ Rate | 89.32% (inverted) | >= 35% (correct) | >= 45% (correct) |
-| Recall@20 | 53.04% | Beat baseline +10% | +20% |
+| Metric | Value | Implication |
+|--------|-------|-------------|
+| Next-day repeat rate | 12.77% | Some persistence exists |
+| Mean gap between appearances | 7.79 days | Weekly-ish cycling |
+| L_1 adjacency (+/-2) | **33.04%** | 3x random - edge positions predictable |
+| L_5 adjacency (+/-2) | **31.45%** | 3x random - edge positions predictable |
+| L_2/L_3/L_4 adjacency (+/-2) | ~20% | 2x random - harder to predict |
+| +/-4 window hit rate | 71.9% | Adjacency is exploitable signal |
 
-**Note:** Need to distinguish between "Good+ via correct" vs "Good+ via inverted". Target should be 0-1 wrong, not 4-5 wrong.
+### Oracle Upper Bound (2025-12-29)
+
+With adjacency-weighted scoring + 50 stochastic sets per day:
+
+| Metric | Value |
+|--------|-------|
+| Days with CORRECT set (0-1 wrong) | **1.10%** |
+| Days with 2-wrong set | 20.00% |
+| Days with 3-wrong set | 50.41% |
+| Avg best wrong | 3.09 |
+
+**Paradigm Shift:** Perfect prediction (~1% ceiling) is nearly impossible. New target: **avg wrong < 3.0** via portfolio approach.
+
+### Acceptance Criteria (REVISED)
+
+| Metric | Current | Target | Stretch |
+|--------|---------|--------|---------|
+| Avg best wrong (50 sets) | 3.09 | < 3.0 | < 2.5 |
+| Days with 2-wrong set | 20% | > 30% | > 40% |
+| Recall@20 | 51% | > 60% | > 70% |
+
+**Note:** Shifted from binary "correct/inverted" to continuous "minimize avg wrong" optimization.
 
 ---
 
@@ -160,3 +190,4 @@ The high Good+ rate (89%) comes from **4-5 wrong predictions** (inverted signal)
 |------|---------|--------|--------|
 | 2025-12-XX | 1.0.0 | Initial TODO from ChatGPT genesis | Original |
 | 2025-12-29 | 2.0.0 | Updated with completed EDA tasks, added tables, linked to PRD/Architecture | Priya |
+| 2025-12-29 | 2.1.0 | Added transition analysis, Oracle upper bound, revised acceptance criteria | Priya |

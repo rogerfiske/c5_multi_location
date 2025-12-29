@@ -9,9 +9,10 @@ This research project builds ML pipelines to **predict next-day California manuf
 2. **Ranked Sets**: Multiple candidate 5-part combinations for location assignments
 
 ### Project Status
-- **Phase**: Gap Analysis Complete, PRD/Architecture Updates Pending
-- **Last Session**: 2025-12-28 (Gap Analysis, Data Contract Created)
-- **Next Steps**: Update PRD.md and Architecture.md, then parse into Epics
+- **Phase**: Baseline Evaluation Complete, Paradigm Shift Identified
+- **Last Session**: 2025-12-29 (Baseline eval, Transition analysis, Oracle bound)
+- **Key Finding**: Frequency-based prediction yields 0% correct (89% inverted). Oracle upper bound ~1%.
+- **Next Steps**: Option D - Portfolio approach + Position-specific models + Sequence prediction
 
 ---
 
@@ -97,7 +98,7 @@ This project uses the BMAD Method with a specialized team of 7 agents for foreca
 - **Architecture (Draft)**: `docs/c5_team_blueprint_artifacts_v2/_bmad-output/planning-artifacts/c5_team_blueprint/Architecture.md`
 - **TODO**: `docs/c5_team_blueprint_artifacts_v2/_bmad-output/planning-artifacts/c5_team_blueprint/TODO.md`
 - **C5 Module**: `_bmad/c5/`
-- **Session Notes**: `Session_summary_2025-12-28.md`, `Start_Here_Tomorrow_2025-12-29.md`
+- **Session Notes**: `Session_summary_2025-12-29.md`, `Start_Here_Tomorrow_2025-12-30.md`
 
 ---
 
@@ -111,7 +112,11 @@ c5_multi_location/
 │   ├── data_contract.md        # Single source of truth for data specs
 │   ├── pc_specs.md             # Hardware specifications
 │   └── c5_team_blueprint_artifacts_v2/  # ChatGPT genesis documents
-├── scripts/                    # Data processing scripts
+├── scripts/                    # Analysis and baseline scripts
+│   ├── baseline_evaluation.py      # 4 frequency baselines
+│   ├── transition_analysis.py      # Day-over-day pattern analysis
+│   ├── stochastic_sampling_baseline.py  # Oracle upper bound analysis
+│   └── ...
 ├── _bmad/
 │   ├── c5/                     # C5 Agent Team Module
 │   │   ├── agents/             # 7 specialized agents
@@ -120,7 +125,7 @@ c5_multi_location/
 │   ├── bmm/                    # BMAD Method Module
 │   ├── bmb/                    # BMAD Builder Module
 │   └── core/                   # BMAD Core
-├── Session_summary_2025-12-28.md   # Session notes
-├── Start_Here_Tomorrow_2025-12-29.md  # Next session guide
+├── Session_summary_2025-12-29.md   # Session notes
+├── Start_Here_Tomorrow_2025-12-30.md  # Next session guide
 └── README.md
 ```
