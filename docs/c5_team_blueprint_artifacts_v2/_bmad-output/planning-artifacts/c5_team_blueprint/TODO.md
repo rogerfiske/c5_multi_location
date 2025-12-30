@@ -1,7 +1,7 @@
 # TODO — C5 Multi-Location Parts Forecasting (Research)
 
-**Version:** 2.0.0
-**Last Updated:** 2025-12-29
+**Version:** 2.2.0
+**Last Updated:** 2025-12-30
 
 > **Reference Documents:**
 > - [`docs/data_contract.md`](../../../../data_contract.md) — Data specifications
@@ -81,6 +81,8 @@
 | Transition analysis | DONE | `scripts/transition_analysis.py` - Found adjacency signals |
 | Adjacency-weighted baseline | DONE | `scripts/adjacency_weighted_baseline.py` - Recall improved |
 | Stochastic sampling baseline | DONE | `scripts/stochastic_sampling_baseline.py` - Oracle 1.1% |
+| Exclusion analysis | DONE | `scripts/exclusion_analysis.py` - Inversion not viable (1.37% exclusion@20) |
+| Position-specific cascade model | DONE | `scripts/position_specific_baseline.py` - **TARGET MET: avg 2.69** |
 
 ### Baseline Results (2025-12-29)
 
@@ -123,15 +125,56 @@ With adjacency-weighted scoring + 50 stochastic sets per day:
 
 **Paradigm Shift:** Perfect prediction (~1% ceiling) is nearly impossible. New target: **avg wrong < 3.0** via portfolio approach.
 
-### Acceptance Criteria (REVISED)
+### Exclusion Analysis (2025-12-30)
 
-| Metric | Current | Target | Stretch |
-|--------|---------|--------|---------|
-| Avg best wrong (50 sets) | 3.09 | < 3.0 | < 2.5 |
-| Days with 2-wrong set | 20% | > 30% | > 40% |
-| Recall@20 | 51% | > 60% | > 70% |
+Investigated whether top-K predictions consistently EXCLUDE correct parts (inversion hypothesis):
 
-**Note:** Shifted from binary "correct/inverted" to continuous "minimize avg wrong" optimization.
+| K | Exclusion Rate | Anti-Recall | Conclusion |
+|---|----------------|-------------|------------|
+| 10 | 20.82% | 74.41% | Partial exclusion |
+| 15 | 6.85% | 60.55% | Rare exclusion |
+| **20** | **1.37%** | 46.52% | **Inversion NOT viable** |
+| 25 | 0.00% | 32.88% | Never excluded |
+
+**Finding:** The top-20 pool almost always contains SOME correct parts (Recall@20 ~51%). The problem is SET SELECTION from a decent pool, not pool exclusion. Inversion strategy is not viable.
+
+### Position-Specific Cascade Model (2025-12-30) - TARGET MET
+
+Exploits 33% adjacency signal in edge positions (L_1, L_5) using cascade prediction.
+
+**Position Accuracy (Combined = Exact + Adjacent +/-2):**
+
+| Position | Combined | Signal Strength |
+|----------|----------|-----------------|
+| L_1 * | **36.54%** | 3x random |
+| L_2 | 22.53% | 2x random |
+| L_3 | 23.08% | 2x random |
+| L_4 | 20.05% | 2x random |
+| L_5 * | **37.36%** | 3x random |
+
+**Model Performance (Portfolio of 50 sets):**
+
+| Model | Avg Wrong | Correct (0-1) | Good (0-2) |
+|-------|-----------|---------------|------------|
+| Rolling Frequency (Greedy) | 4.44 | 0.00% | ~11% |
+| Stochastic Oracle (50 sets) | 3.09 | 1.10% | ~21% |
+| **Cascade Portfolio** | **2.69** | **1.65%** | **32.69%** |
+
+**Improvement:** 3.09 -> 2.69 (13% reduction, 0.4 fewer wrong per day)
+
+**Distribution Shift:**
+- Eliminated 5-wrong days (48% -> 0%)
+- 95% of days now at 2-3 wrong
+
+### Acceptance Criteria (UPDATED 2025-12-30)
+
+| Metric | Previous | Current | Target | Stretch |
+|--------|----------|---------|--------|---------|
+| Avg best wrong (50 sets) | 3.09 | **2.69** | ~~< 3.0~~ MET | < 2.5 |
+| Days with 0-2 wrong | 21% | **32.69%** | > 30% MET | > 40% |
+| Correct rate (0-1 wrong) | 1.10% | **1.65%** | > 3% | > 5% |
+
+**Note:** Primary target (avg < 3.0) achieved. New focus: push toward stretch goals.
 
 ---
 
@@ -152,11 +195,12 @@ With adjacency-weighted scoring + 50 stochastic sets per day:
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Implement cascade model | TODO | Predict L_1 → filter → L_2 → ... |
-| Implement weighted sampling | TODO | Score-proportional |
-| Implement constrained search | TODO | Beam search with diversity |
-| Score sets (joint likelihood) | TODO | |
-| Optional L_1..L_5 assignment resolver | TODO | |
+| Implement cascade model | **DONE** | `position_specific_baseline.py` - L_1 -> filter -> L_2 -> ... |
+| Implement weighted sampling | **DONE** | Score-proportional stochastic sampling in cascade |
+| Implement constrained search | PARTIAL | Cascade filtering respects L_1 < L_2 < ... < L_5 |
+| Score sets (joint likelihood) | TODO | Currently using portfolio best-of selection |
+| Optional L_1..L_5 assignment resolver | N/A | Cascade inherently assigns positions |
+| Portfolio generation | **DONE** | 50 diverse sets per day, best-of selection |
 
 ---
 
@@ -191,3 +235,4 @@ With adjacency-weighted scoring + 50 stochastic sets per day:
 | 2025-12-XX | 1.0.0 | Initial TODO from ChatGPT genesis | Original |
 | 2025-12-29 | 2.0.0 | Updated with completed EDA tasks, added tables, linked to PRD/Architecture | Priya |
 | 2025-12-29 | 2.1.0 | Added transition analysis, Oracle upper bound, revised acceptance criteria | Priya |
+| 2025-12-30 | 2.2.0 | **TARGET MET** - Added exclusion analysis (inversion not viable), position-specific cascade model (avg 2.69), updated acceptance criteria | Priya + C5 Team |
