@@ -1,0 +1,23 @@
+{
+  "target_date": "2025-12-21",
+  "data_through": "2025-12-20",
+  "training_samples": 6313,
+  "generation_time": "2025-12-30 09:22:32",
+  "config": {
+    "portfolio_size": 200,
+    "adjacency_window": 3,
+    "edge_boost": 3.0,
+    "middle_boost": 2.0,
+    "markov_weight": 0.3,
+    "rolling_window": 30,
+    "pool_size": 20,
+    "model_version": "1.0.0"
+  },
+  "previous_day_parts": [
+    32,
+    37,
+    11,
+    28,
+    29
+  ]
+}
