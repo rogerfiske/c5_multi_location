@@ -1,6 +1,6 @@
 # TODO — C5 Multi-Location Parts Forecasting (Research)
 
-**Version:** 2.3.0
+**Version:** 2.4.0
 **Last Updated:** 2025-12-30
 
 > **Reference Documents:**
@@ -225,6 +225,92 @@ Combined: 0% 0-wrong, 6% 1-wrong, 66% 2-wrong, 28% 3-wrong, 0% 4-wrong, 0% 5-wro
 | Correct rate | 1.65% | **6.04%** | > 3% | > 5% | **ALL MET** |
 | 4-5 wrong days | 3.3% | **0%** | - | - | **Eliminated** |
 
+### CRITICAL INVESTIGATION: Prediction Viability (2025-12-30)
+
+Following the "stretch goals met" milestone, deeper investigation revealed fundamental issues:
+
+#### User Insight: 2-3 Wrong is the Unusable Zone
+
+The 72% "good rate" (0-2 wrong) is misleading. User clarified:
+- **0-1 wrong** = Actionable (can use the prediction directly)
+- **4-5 wrong** = Actionable (can use the INVERSE prediction)
+- **2-3 wrong** = UNUSABLE (neither direct nor inverse works)
+
+Current model: 6% at 0-1 wrong, 66% at 2 wrong, 28% at 3 wrong = **94% in unusable zone**
+
+#### Aggregated Matrix Analysis (No Signal)
+
+Tested if multi-state consensus (P_1 to P_39) predicts CA5:
+
+| Test | Result | Script |
+|------|--------|--------|
+| Lag-0 to Lag-5 correlation | All < 0.01, lift ~1.0x | `aggregated_signal_analysis.py` |
+| Velocity (P_today - P_yesterday) | All lifts ~1.0x | `aggregated_velocity_analysis.py` |
+| Concentration as regime indicator | No correlation (max +0.035) | `aggregated_concentration_analysis.py` |
+
+**Conclusion:** Multi-state consensus provides NO predictive signal for CA5.
+
+#### Dual Portfolio / Confidence Classifier (Cannot Predict Regime)
+
+Attempted to predict which days would be 0-1 wrong vs 4-5 wrong:
+
+| Approach | Result | Script |
+|----------|--------|--------|
+| Regime classifier | Cannot predict, always abstains | `dual_model_classifier.py` |
+| Adjacency vs Anti-adjacency | Portfolios converge (not opposites) | `hybrid_portfolio_model.py` |
+| Pool overlap as confidence | 98.4% days HIGH confidence (not discriminating) | `confidence_prediction_system.py` |
+
+**Conclusion:** Cannot reliably predict which strategy will work on a given day.
+
+#### Unordered Set Analysis (Doesn't Help)
+
+Removed ascending constraint (L_1 < L_2 < ... < L_5), just require 5 unique parts:
+
+| Portfolio Size | Avg Wrong | Good Rate | Script |
+|----------------|-----------|-----------|--------|
+| 200 (unordered) | 2.370 | 58.4% | `unordered_set_model.py` |
+| 400 (combined) | 1.995 | 91.2% | `unordered_set_model.py` |
+| 1000 (combined) | 1.764 | 98.9% | `unordered_scaling_test.py` |
+
+User correctly rejected 1000-set approach: "like saying if i pick a pool of 39 parts i will have 100% accuracy" - brute force, not prediction.
+
+#### DEVASTATING FINDING: Random Beats the Model
+
+Fair comparison at SAME portfolio size (`fair_comparison.py`):
+
+| Strategy | Portfolio Size | Avg Wrong | Good Rate |
+|----------|----------------|-----------|-----------|
+| **Random (no model)** | 200 | **2.055** | **87.1%** |
+| Unordered Model | 200 | 2.370 | 58.4% |
+| Ordered Model | 200 | 2.438 | 53.7% |
+
+**The prediction model is WORSE than random sampling!**
+
+Why? Biased sampling reduces portfolio diversity:
+- Random 200 sets covers ~39 parts uniformly
+- Model-biased 200 sets concentrates on ~15-20 high-scoring parts
+- Uniform coverage wins because there is NO exploitable signal
+
+### Decision: Prediction Approach ABANDONED
+
+**Date:** 2025-12-30
+
+**Rationale:**
+1. Multi-state consensus provides no signal
+2. Cannot predict which days will be correct vs inverted
+3. Random sampling outperforms the model at equal portfolio size
+4. The "model" actually reduces performance by biasing toward fewer parts
+
+**What the data tells us:**
+- Parts cycle uniformly through the 39-part space every ~30 days
+- Day-over-day adjacency (~33%) is the ONLY weak signal, but exploiting it hurts diversity more than it helps
+- At equal portfolio sizes, uniform random sampling is optimal
+
+**Recommendation:** This research demonstrates that deterministic prediction of lottery-style CA5 outcomes is not viable. The data exhibits near-uniform randomness with no exploitable patterns beyond trivial adjacency. Future work should either:
+1. Accept random baseline performance (~2.05 avg wrong, ~87% good rate)
+2. Focus on portfolio diversity optimization rather than prediction
+3. Investigate entirely different data sources or problem formulations
+
 ---
 
 ## Phase 4 — First ML Models
@@ -286,3 +372,4 @@ Combined: 0% 0-wrong, 6% 1-wrong, 66% 2-wrong, 28% 3-wrong, 0% 4-wrong, 0% 5-wro
 | 2025-12-29 | 2.1.0 | Added transition analysis, Oracle upper bound, revised acceptance criteria | Priya |
 | 2025-12-30 | 2.2.0 | **TARGET MET** - Added exclusion analysis (inversion not viable), position-specific cascade model (avg 2.69), updated acceptance criteria | Priya + C5 Team |
 | 2025-12-30 | 2.3.0 | **ALL STRETCH GOALS MET** - Tuning (portfolio 200, adj=3) + Markov signal achieves avg 2.217, 72.25% good rate, 6.04% correct rate | Priya + C5 Team |
+| 2025-12-30 | 2.4.0 | **PREDICTION ABANDONED** - Aggregated matrix no signal, dual portfolio cannot predict regime, random beats model (2.05 vs 2.44 avg wrong). Research concludes prediction is not viable. | Priya + C5 Team |

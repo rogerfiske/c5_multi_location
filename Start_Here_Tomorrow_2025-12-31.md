@@ -2,103 +2,117 @@
 
 **Project:** C5 Multi-Location Parts Forecasting (Research)
 **Last Session:** 2025-12-30
-**Context:** ALL STRETCH GOALS MET - Combined model achieved avg wrong 2.217
+**Context:** PREDICTION APPROACH ABANDONED - Random beats the model
 
 ---
 
 ## Quick Context (30-second recap)
 
 - **Problem:** Predict tomorrow's 5-part set from 39 possible parts
-- **Original baseline:** Stochastic Oracle avg wrong = 3.09
-- **Final model:** Combined Portfolio avg wrong = **2.217** (ALL STRETCH GOALS MET)
-- **Key finding:** Portfolio size is the biggest lever (200 sets = 15.8% improvement)
-- **Distribution:** 72% of days at 0-2 wrong, 0% at 4-5 wrong
+- **Morning achievement:** Combined model avg wrong = 2.217, "all stretch goals met"
+- **Evening discovery:** Random sampling (2.05) BEATS the model (2.44)
+- **Critical finding:** The "model" reduces diversity, which hurts performance
+- **Decision:** Prediction approach abandoned
 
 ---
 
-## Current Status: ALL TARGETS ACHIEVED
+## Current Status: RESEARCH CONCLUDED
 
-| Metric | Original | Final | Target | Stretch | Status |
-|--------|----------|-------|--------|---------|--------|
-| Avg wrong | 2.69 | **2.217** | < 3.0 | < 2.5 | **ALL MET** |
-| Days 0-2 wrong | 32.69% | **72.25%** | > 30% | > 60% | **ALL MET** |
-| Correct rate | 1.65% | **6.04%** | > 3% | > 5% | **ALL MET** |
-| 4-5 wrong | 3.3% | **0%** | - | - | **Eliminated** |
+| Finding | Value | Implication |
+|---------|-------|-------------|
+| Random baseline (200 sets) | 2.05 avg wrong, 87% good | Optimal at fixed portfolio size |
+| Model baseline (200 sets) | 2.44 avg wrong, 54% good | WORSE than random |
+| Difference | -18.7% | Model hurts, not helps |
 
----
+### Why the Model Failed
 
-## Optimal Configuration (Production-Ready)
-
-```python
-# Combined optimized model
-PORTFOLIO_SIZE = 200      # Biggest lever - 15.8% improvement alone
-ADJACENCY_WINDOW = 3      # +/-3 slightly better than +/-2
-EDGE_BOOST = 3.0          # 3x boost for L_1, L_5 positions
-MIDDLE_BOOST = 2.0        # 2x boost for L_2, L_3, L_4 positions
-MARKOV_WEIGHT = 0.3       # Additional 2% improvement
-```
-
-**Run optimized model:**
-```bash
-python scripts/combined_model.py
-```
+The adjacency "signal" (33%) appears exploitable but:
+1. **Biased sampling reduces diversity** - concentrates on ~15-20 parts
+2. **Diversity loss > signal gain** - uniform coverage is better
+3. **No regime prediction** - cannot tell which days work
 
 ---
 
-## What Worked vs What Didn't
+## Key Scripts (Investigation)
 
-### What Worked:
-1. **Portfolio size (200)** - More sets = better best-of selection (15.8% gain)
-2. **Position-specific adjacency** - L_1/L_5 have 37% signal (3x random)
-3. **Cascade filtering** - Respects L_1 < L_2 < ... < L_5 constraint
-4. **Markov signal** - Small but additive improvement (2%)
-
-### What Didn't Work:
-1. **Inversion strategy** - Only 1.37% exclusion rate, not viable
-2. **Multi-state consensus** - Cross-state correlation ~0
-3. **Larger adjacency windows** - +/-4 and +/-5 were worse
-4. **Higher edge boosts** - 4.0 and 5.0 were worse than 3.0
-
----
-
-## Key Scripts Reference
-
-| Script | Purpose | Last Result |
+| Script | Purpose | Key Finding |
 |--------|---------|-------------|
-| `combined_model.py` | Optimized model | **avg 2.217** - ALL STRETCH MET |
-| `cascade_tuning.py` | Parameter sweep | Portfolio 200 best |
-| `markov_model.py` | Transition model | Small additive lift |
-| `position_specific_baseline.py` | Cascade model | avg 2.69 |
-| `exclusion_analysis.py` | Inversion test | Not viable |
+| `fair_comparison.py` | Same-size comparison | **Random BEATS model** |
+| `aggregated_signal_analysis.py` | Multi-state consensus | No signal (lift ~1.0x) |
+| `dual_model_classifier.py` | Regime prediction | Cannot classify |
+| `unordered_set_model.py` | Remove constraint | Doesn't help fairly |
+| `confidence_prediction_system.py` | Confidence routing | Not discriminating |
 
 ---
 
-## Critical Numbers to Remember
+## Critical Numbers
 
-| Metric | Value | Meaning |
-|--------|-------|---------|
-| **2.217** | Final avg wrong | **Optimized model** |
-| 200 | Optimal portfolio size | Biggest lever |
-| +/-3 | Optimal adjacency window | Slight improvement |
-| 0.3 | Optimal Markov weight | Additive signal |
-| 72.25% | Good rate (0-2 wrong) | 3/4 of days |
-| 6.04% | Correct rate (0-1 wrong) | ~22 days per year |
-| 0% | 4-5 wrong days | Eliminated worst cases |
+| Metric | Random (200) | Model (200) | Delta |
+|--------|--------------|-------------|-------|
+| Avg Wrong | **2.055** | 2.438 | Model is 18.7% worse |
+| Good Rate | **87.1%** | 53.7% | Model is 33% worse |
+| Excellent Rate | ~2% | ~2% | Same |
+
+**Bottom line:** At equal portfolio sizes, random sampling is optimal.
 
 ---
 
-## Possible Next Steps (Optional - All Goals Met)
+## What We Learned
 
-1. **Production packaging** - Clean up combined_model.py into reusable module
-2. **LSTM/Transformer** - Test neural sequence models (diminishing returns expected)
-3. **Larger portfolio** - Test 500+ sets (may hit diminishing returns)
-4. **Feature engineering** - Calendar features, seasonality
+### Signal Analysis
+- Aggregated matrix: NO signal (states independent)
+- Adjacency: 33% but exploiting it hurts diversity
+- Dual portfolio: Converges, not opposites
+- Confidence: Cannot predict which days work
+
+### The 2-3 Wrong Problem
+| Wrong Count | Category | Model % |
+|-------------|----------|---------|
+| 0-1 | Actionable (correct) | 6% |
+| 2-3 | **Unusable** | 94% |
+| 4-5 | Actionable (invert) | 0% |
+
+94% of days fall in the unusable zone where neither direct prediction nor inversion works.
+
+---
+
+## Possible Directions (User Decision Required)
+
+### Option 1: Close Project
+- Document findings in final report
+- Archive repository
+- Conclusion: CA5 is unpredictable
+
+### Option 2: Accept Random Baseline
+- Use uniform random sampling (2.05 avg wrong, 87% good)
+- No model needed
+- Simple and honest
+
+### Option 3: Different Problem Formulation
+- Not set prediction
+- Probability distributions over parts
+- Partial matching / coverage optimization
+
+### Option 4: External Data Sources
+- Not historical CA5 patterns
+- Weather, calendar, external factors
+- Fundamentally different approach
+
+---
+
+## Documents to Reference
+
+| Document | Location | Purpose |
+|----------|----------|---------|
+| TODO | `docs/.../TODO.md` | Task tracking (v2.4.0 - ABANDONED) |
+| Session Summary | `Session_summary_2025-12-30.md` | Full investigation details |
+| Data Contract | `docs/data_contract.md` | Schema, invariants |
 
 ---
 
 ## Team Agents Available
 
-Invoke party mode for brainstorming: `/bmad:core:workflows:party-mode`
+Invoke party mode for discussion: `/bmad:core:workflows:party-mode`
 
 **C5 Team:**
 - Priya (PO) - `/bmad:c5:agents:c5-product-owner`
@@ -109,50 +123,40 @@ Invoke party mode for brainstorming: `/bmad:core:workflows:party-mode`
 
 ---
 
-## Documents to Reference
-
-| Document | Location | Purpose |
-|----------|----------|---------|
-| TODO | `docs/.../TODO.md` | Task tracking (v2.3.0) |
-| Data Contract | `docs/data_contract.md` | Schema, invariants |
-| Session Summary | `Session_summary_2025-12-30.md` | Full details |
-
----
-
-## Suggested Opening Command
+## Suggested Opening
 
 ```
-Good morning! All stretch goals were met yesterday.
+Good morning! Yesterday's session ended with a major finding:
 
-The combined model achieved avg wrong 2.217, 72% good rate, 6% correct rate.
-We can either:
-1. Package this for production use
-2. Explore further optimizations (diminishing returns expected)
-3. Start a new research direction
+Random sampling (200 sets) achieves 2.05 avg wrong, 87% good rate.
+The prediction model (200 sets) achieves 2.44 avg wrong, 54% good rate.
+
+Random beats the model by 18.7%. The prediction approach has been abandoned.
+
+Options:
+1. Close project - document findings, archive
+2. Accept random baseline - no model needed
+3. Pivot to different problem - not set prediction
+4. External data - not historical patterns
 ```
 
 ---
 
-## Research Status: SUCCESS
-
-All acceptance criteria met. Project ready for production packaging or further exploration.
+## Research Status: CONCLUDED
 
 | Phase | Status |
 |-------|--------|
 | Phase 0: Repository Hygiene | PARTIAL |
 | Phase 1: Ingestion + Validation | PARTIAL |
 | Phase 2: EDA | DONE |
-| Phase 3: Baselines | **DONE - ALL STRETCH GOALS MET** |
-| Phase 4: First ML Models | Not started (may not be needed) |
-| Phase 5: Set Generation | **DONE** |
-| Phase 6: Ensemble | PARTIAL (tuning done) |
-| Phase 7: Research Packaging | TODO |
+| Phase 3: Baselines | **DONE - PREDICTION ABANDONED** |
+| Phase 4: First ML Models | N/A - Abandoned |
+| Phase 5: Set Generation | N/A - Abandoned |
+| Phase 6: Ensemble | N/A - Abandoned |
+| Phase 7: Research Packaging | Pending decision |
 
 ---
 
-## Git Status
+## Key Takeaway
 
-All work from 2025-12-30 committed and pushed. Clean slate for tomorrow.
-
-Repository: `https://github.com/rogerfiske/c5_multi_location`
-Branch: `main`
+This research demonstrated that deterministic prediction of lottery-style CA5 outcomes is not viable. The data exhibits near-uniform randomness with no exploitable patterns. At equal portfolio sizes, uniform random sampling is optimal.
