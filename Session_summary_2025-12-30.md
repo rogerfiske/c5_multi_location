@@ -298,6 +298,59 @@ Fair comparison at SAME portfolio size (`fair_comparison.py`):
 
 ---
 
+## Research Methodology
+
+The methodology was primarily **statistical and heuristic-based**, not machine learning in the modern sense.
+
+### Approaches Used
+
+#### 1. Exploratory Data Analysis (EDA)
+- Frequency distributions across 39 parts
+- Rolling window coverage analysis
+- Gap/recency distributions
+- Cross-state correlation analysis
+
+#### 2. Statistical Signal Detection
+- Lag correlation (0-5 days) with aggregated matrix
+- Lift calculations (observed vs expected frequency)
+- Transition probability matrices (Markov)
+- Adjacency tendency quantification (+/-2, +/-3, +/-4 windows)
+
+#### 3. Heuristic Rule-Based Models
+- **Frequency scoring**: P(part) based on rolling 30-day window
+- **Adjacency boosting**: 3x weight for parts near yesterday's values
+- **Position-specific cascade**: L_1 → filter → L_2 → ... → L_5 with ascending constraint
+- **Edge position exploitation**: Higher boost for L_1/L_5 (37% signal vs 22% for middle)
+
+#### 4. Probabilistic Sampling
+- Score-proportional stochastic sampling (not greedy)
+- Portfolio generation (50-200 diverse candidate sets)
+- Best-of-N selection strategy
+
+#### 5. Comparative Benchmarking
+- Multiple baselines (global freq, rolling freq, persistence, random)
+- Fair comparison at equal portfolio sizes
+- Holdout validation (365-day backtest)
+
+### What Was NOT Used
+
+| Technique | Status | Reason |
+|-----------|--------|--------|
+| Neural networks (LSTM, Transformer) | Not implemented | Abandoned before reaching this phase |
+| Gradient boosting (XGBoost, LightGBM) | Not implemented | Research concluded at baseline phase |
+| Deep learning | Not implemented | No signal to learn from |
+| Supervised classification | Attempted (regime classifier) | Failed - could not predict regime |
+
+### The One "ML" Attempt
+
+A simple **regime classifier** was attempted (`dual_model_classifier.py`) to predict which days would favor adjacency vs anti-adjacency strategies. It used basic features (pool overlap, score distributions) but failed - it could not reliably predict regime and defaulted to always abstaining.
+
+### Methodology Summary
+
+The research was fundamentally **statistical exploration + heuristic optimization**, not ML. The key finding - that random sampling beats the model - was discovered through systematic benchmarking, not through training and evaluating ML models. The project never progressed to Phase 4 (ML models) because Phase 3 (baselines) revealed there was no signal to model.
+
+---
+
 ## Scripts Created (Evening Session)
 
 | Script | Purpose | Key Output |
