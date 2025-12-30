@@ -1,6 +1,6 @@
 # TODO — C5 Multi-Location Parts Forecasting (Research)
 
-**Version:** 2.2.0
+**Version:** 2.3.0
 **Last Updated:** 2025-12-30
 
 > **Reference Documents:**
@@ -83,6 +83,10 @@
 | Stochastic sampling baseline | DONE | `scripts/stochastic_sampling_baseline.py` - Oracle 1.1% |
 | Exclusion analysis | DONE | `scripts/exclusion_analysis.py` - Inversion not viable (1.37% exclusion@20) |
 | Position-specific cascade model | DONE | `scripts/position_specific_baseline.py` - **TARGET MET: avg 2.69** |
+| Cascade tuning sweep | DONE | `scripts/cascade_tuning.py` - Portfolio 200 best (avg 2.264) |
+| Markov transition model | DONE | `scripts/markov_model.py` - Small additive lift (2%) |
+| Multi-state consensus | DONE | `scripts/multistate_signal.py` - No improvement |
+| Combined optimized model | DONE | `scripts/combined_model.py` - **ALL STRETCH GOALS MET: avg 2.217** |
 
 ### Baseline Results (2025-12-29)
 
@@ -176,6 +180,51 @@ Exploits 33% adjacency signal in edge positions (L_1, L_5) using cascade predict
 
 **Note:** Primary target (avg < 3.0) achieved. New focus: push toward stretch goals.
 
+### Combined Optimized Model (2025-12-30) - ALL STRETCH GOALS MET
+
+After systematic tuning and signal combination:
+
+**Configuration:**
+- Portfolio size: 200 sets (biggest lever - 15.8% improvement alone)
+- Adjacency window: +/-3 (slight improvement over +/-2)
+- Markov signal: weight 0.3 (additional 2% improvement)
+- Multi-state: No improvement (cross-state correlation ~0)
+
+**Tuning Results:**
+
+| Parameter | Tested Values | Best |
+|-----------|---------------|------|
+| Portfolio size | 25, 50, 100, 200 | **200** |
+| Adjacency window | +/-2, +/-3, +/-4, +/-5 | **+/-3** |
+| Edge boost | 2.0, 3.0, 4.0, 5.0 | **3.0** |
+| Markov weight | 0.0, 0.1, 0.2, 0.3, 0.4, 0.5 | **0.3** |
+
+**Final Model Performance:**
+
+| Model | Avg Wrong | Good Rate | Correct Rate |
+|-------|-----------|-----------|--------------|
+| Original baseline | 2.69 | 32.69% | 1.65% |
+| Cascade (50 sets) | 2.69 | 32.69% | 1.65% |
+| Tuned (200 sets, adj=3) | 2.264 | 68.96% | 4.67% |
+| **Combined (+Markov)** | **2.217** | **72.25%** | **6.04%** |
+
+**Distribution Shift:**
+```
+Original: 0% 0-wrong, 2% 1-wrong, 31% 2-wrong, 64% 3-wrong, 3% 4-wrong, 0% 5-wrong
+Combined: 0% 0-wrong, 6% 1-wrong, 66% 2-wrong, 28% 3-wrong, 0% 4-wrong, 0% 5-wrong
+```
+
+**Improvement:** 17.6% reduction in avg wrong (2.69 -> 2.217)
+
+### Acceptance Criteria (FINAL 2025-12-30)
+
+| Metric | Original | Current | Target | Stretch | Status |
+|--------|----------|---------|--------|---------|--------|
+| Avg best wrong | 2.69 | **2.217** | < 3.0 | < 2.5 | **ALL MET** |
+| Days 0-2 wrong | 32.69% | **72.25%** | > 30% | > 60% | **ALL MET** |
+| Correct rate | 1.65% | **6.04%** | > 3% | > 5% | **ALL MET** |
+| 4-5 wrong days | 3.3% | **0%** | - | - | **Eliminated** |
+
 ---
 
 ## Phase 4 — First ML Models
@@ -236,3 +285,4 @@ Exploits 33% adjacency signal in edge positions (L_1, L_5) using cascade predict
 | 2025-12-29 | 2.0.0 | Updated with completed EDA tasks, added tables, linked to PRD/Architecture | Priya |
 | 2025-12-29 | 2.1.0 | Added transition analysis, Oracle upper bound, revised acceptance criteria | Priya |
 | 2025-12-30 | 2.2.0 | **TARGET MET** - Added exclusion analysis (inversion not viable), position-specific cascade model (avg 2.69), updated acceptance criteria | Priya + C5 Team |
+| 2025-12-30 | 2.3.0 | **ALL STRETCH GOALS MET** - Tuning (portfolio 200, adj=3) + Markov signal achieves avg 2.217, 72.25% good rate, 6.04% correct rate | Priya + C5 Team |

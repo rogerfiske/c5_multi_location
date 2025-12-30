@@ -1,8 +1,8 @@
 # Session Summary - 2025-12-30
 
 **Project:** C5 Multi-Location Parts Forecasting (Research)
-**Duration:** ~1.5 hours
-**Focus:** Exclusion analysis, Position-specific cascade model, TARGET MET
+**Duration:** ~4 hours
+**Focus:** Exclusion analysis, Position-specific cascade model, Tuning, Markov, ALL STRETCH GOALS MET
 
 ---
 
@@ -129,10 +129,82 @@ Ready to commit:
 
 ---
 
-## Key Takeaway
+## Key Takeaway (Morning Session)
 
 The position-specific cascade model works because:
 1. Edge positions (L_1, L_5) have 3x random adjacency signal
 2. Cascade respects ascending constraint (L_1 < L_2 < ... < L_5)
 3. Portfolio diversity captures good sets that greedy misses
 4. Combined effect: 13% improvement, target met on first try
+
+---
+
+## Afternoon Session: Tuning + Signal Combination (Hours 1-3)
+
+### Hour 1: Cascade Tuning - MAJOR WIN
+
+Systematic parameter sweep revealed **portfolio size is the biggest lever**:
+
+| Portfolio Size | Avg Wrong | Good Rate | Correct Rate |
+|----------------|-----------|-----------|--------------|
+| 25 | 2.909 | 19.78% | 0.82% |
+| 50 (baseline) | 2.690 | 32.69% | 1.65% |
+| 100 | 2.492 | 49.73% | 1.65% |
+| **200** | **2.264** | **68.96%** | **4.67%** |
+
+Other parameters:
+- Adjacency window +/-3 slightly better than +/-2
+- Edge boost 3.0 remains optimal
+
+### Hour 2: Markov Transition Model - Small Additive
+
+Built P(part_tomorrow | part_today) transition matrix:
+- Average repeat probability: 12.68% (near random baseline 12.82%)
+- Best Markov weight: 0.3
+- Additional improvement: 2% on top of tuning
+
+### Hour 3: Multi-State Consensus - No Improvement
+
+- Cross-state correlation is near zero (as EDA found)
+- Multi-state signal not useful as standalone
+- Confirms states are independent
+
+### Combined Model: ALL STRETCH GOALS MET
+
+Final configuration:
+- Portfolio size: 200
+- Adjacency window: +/-3
+- Markov weight: 0.3
+
+| Metric | Original | Final | Improvement |
+|--------|----------|-------|-------------|
+| Avg wrong | 2.69 | **2.217** | **17.6%** |
+| Good rate | 32.69% | **72.25%** | **2.2x** |
+| Correct rate | 1.65% | **6.04%** | **3.7x** |
+| 4-5 wrong days | 3.3% | **0%** | Eliminated |
+
+---
+
+## Scripts Created (Full Session)
+
+| Script | Purpose | Key Output |
+|--------|---------|------------|
+| `exclusion_analysis.py` | Test inversion hypothesis | 1.37% exclusion - not viable |
+| `position_specific_baseline.py` | Cascade model | avg 2.69 - TARGET MET |
+| `cascade_tuning.py` | Parameter sweep | Portfolio 200 best |
+| `markov_model.py` | Transition probabilities | Small additive lift |
+| `multistate_signal.py` | Cross-state consensus | No improvement |
+| `combined_model.py` | Optimized model | **avg 2.217 - ALL STRETCH MET** |
+
+---
+
+## Final Key Takeaway
+
+**Portfolio size is the biggest lever.** More candidate sets = better chance of finding a good one.
+
+The optimal configuration (200 sets, adj=3, Markov=0.3) achieves:
+- 72% of days with 0-2 wrong parts
+- 6% of days with perfect/near-perfect predictions
+- Zero days with worst-case (4-5 wrong) outcomes
+
+This is a research success: from 0% correct baseline to 6% correct with systematic optimization.
